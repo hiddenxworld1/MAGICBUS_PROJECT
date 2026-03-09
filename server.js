@@ -18,7 +18,7 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // Test route
 app.get('/', (req, res) => {
-  res.json({ message: 'MagicBus server is running!' });
+  res.json({ message: 'Hidden server is running!' });
 });
 
 // Routes
