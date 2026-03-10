@@ -9,6 +9,12 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+
+// Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/admin', require('./routes/admin'));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Connect to MongoDB
@@ -18,14 +24,12 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // Test route
 app.get('/', (req, res) => {
-  res.json({ message: 'Hidden server is running!' });
+  res.redirect('/login.html');
 });
 
-// Routes
-app.use('/api/auth', require('./routes/auth'));
 
 // Start server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5500;
 app.listen(PORT, () => {
   console.log(`MagicBus server running on http://localhost:${PORT}`);
 });

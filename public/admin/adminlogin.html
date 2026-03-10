@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MagicBus — Admin Login</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      background: #0a0f1e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .login-box {
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 16px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 0 40px rgba(255, 61, 87, 0.08);
+    }
+
+    .logo { text-align:center; margin-bottom:2rem; }
+
+    .logo h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #00d4ff;
+    }
+
+    .logo .admin-tag {
+      display: inline-block;
+      background: rgba(255,61,87,0.15);
+      border: 1px solid rgba(255,61,87,0.3);
+      color: #ff3d57;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 3px 12px;
+      border-radius: 20px;
+      margin-top: 6px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #6b7280;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    input {
+      width: 100%;
+      background: #1f2937;
+      border: 1px solid #374151;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: #f9fafb;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 1.25rem;
+    }
+
+    input:focus { border-color: #ff3d57; }
+
+    .btn-login {
+      width: 100%;
+      background: linear-gradient(135deg, #ff3d57, #7c3aed);
+      border: none;
+      border-radius: 8px;
+      padding: 0.85rem;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn-login:hover { opacity: 0.9; }
+
+    .error-msg {
+      background: rgba(255,61,87,0.1);
+      border: 1px solid rgba(255,61,87,0.3);
+      color: #ff3d57;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .user-login-link {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.8rem;
+      color: #4b5563;
+    }
+
+    .user-login-link a {
+      color: #00d4ff;
+      text-decoration: none;
+    }
+
+    .user-login-link a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <div class="login-box">
+    <div class="logo">
+      <h1>MagicBus</h1>
+      <div class="admin-tag">⚡ Admin Access Only</div>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <div>
+      <label>Admin Email</label>
+      <input
+        type="email"
+        id="email"
+        placeholder="admin@magicbus.com"
+      />
+    </div>
+
+    <div>
+      <label>Password</label>
+      <input
+        type="password"
+        id="password"
+        placeholder="Enter admin password"
+        onkeydown="if(event.key==='Enter') loginAdmin()"
+      />
+    </div>
+
+    <button class="btn-login" onclick="loginAdmin()">
+      Login to Admin Panel
+    </button>
+
+    <div class="user-login-link">
+      Student or Teacher?
+      <a href="/login.html">Login here</a>
+    </div>
+  </div>
+
+  <script>
+    // If already logged in as admin, redirect
+    const token = localStorage.getItem('adminToken');
+    if (token) window.location.href = '/admin/dashboard.html';
+
+    async function loginAdmin() {
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const errorMsg = document.getElementById('errorMsg');
+
+      if (!email || !password) {
+        showError('Please enter email and password');
+        return;
+      }
+
+      errorMsg.style.display = 'none';
+
+      try {
+        const res  = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(data.message || 'Login failed');
+          return;
+        }
+
+        // Save admin token separately
+        localStorage.setItem('adminToken', data.token);
+        localStorage.setItem('adminUser', JSON.stringify(data.user));
+
+        window.location.href = '/admin/dashboard.html';
+
+      } catch (err) {
+        showError('Server error. Please try again.');
+      }
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('errorMsg');
+      el.textContent   = msg;
+      el.style.display = 'block';
+    }
+  </script>
+
+</body>
+</html>
